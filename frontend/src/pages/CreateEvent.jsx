@@ -28,7 +28,7 @@ function CreateEvent() {
         setTimeout(() => setSuccessMessage(""), 3000);
         return;
       }
-      const response = await axios.post("http://localhost:5500/api/events", 
+      const response = await axios.post("https://event-management-platform-backend-pfzw.onrender.com/api/events", 
         { name, description, date, location, category },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -37,11 +37,6 @@ function CreateEvent() {
       setTimeout(() => {
         navigate("/");
       }, 1000);
-      /*setName("");
-      setDescription("");
-      setDate("");
-      setLocation("");
-      setCategory("");*/
     } catch (error) {
       toast.error("Error creating event.");
       console.error("Error:", error);

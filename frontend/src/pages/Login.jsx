@@ -10,8 +10,7 @@ function Login({ setToken, setRole }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5500/api/auth/login", { email, password });
-      //localStorage.setItem("token", response.data.token);
+      const response = await axios.post("https://event-management-platform-backend-pfzw.onrender.com/api/auth/login", { email, password });
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("role", response.data.role);
       setToken(response.data.token);

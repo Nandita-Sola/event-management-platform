@@ -20,13 +20,9 @@ function Home({ role }) {
   const fetchEvents = () => {
     const token = localStorage.getItem("token");
     setLoading(true);
-    let url = "http://localhost:5050/api/events?";
+    let url = "https://event-management-platform-backend-pfzw.onrender.com/api/events?";
   
     if (category) url += `category=${category}&`;
-    /*if (startDate) {
-      const formattedDate = format(new Date(startDate), "yyyy-MM-dd");
-      url += `date=${formattedDate}&`;
-    }*/
       if (startDate) url += `date=${startDate}&`;
   
     axios.get(url, {
@@ -47,7 +43,7 @@ function Home({ role }) {
   
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5500/api/events/${id}`, {
+      await axios.delete(`https://event-management-platform-backend-pfzw.onrender.com/api/events/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success("Event deleted successfully!");
@@ -73,8 +69,8 @@ function Home({ role }) {
   
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.put(`http://localhost:5000/api/events/${id}`, updatedData, { headers: { Authorization: `Bearer ${token}` } });
-      console.log("✅ Update Successful! Exiting edit mode..."); 
+      const response = await axios.put(`https://event-management-platform-backend-pfzw.onrender.com/api/events/${id}`, updatedData, { headers: { Authorization: `Bearer ${token}` } });
+      console.log("Update Successful! Exiting edit mode..."); 
       toast.success("Event updated successfully!");
       setEditingEvent(null);
       fetchEvents();
