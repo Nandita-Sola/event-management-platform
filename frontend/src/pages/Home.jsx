@@ -85,22 +85,30 @@ function Home({ role }) {
     }
   };
 
-  const registerForEvent = async (eventId) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(`https://event-management-platform-backend-pfzw.onrender.com/api/events/${eventId}/register`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      console.log("Successfully registered for event");
+  const handleRegisterClick = async (eventId) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+     toast.error("⚠️ You need to log in to register for events.");
+     return;
+   }
+   try {
+    await axios.post(`https://event-management-platform-backend-pfzw.onrender.com/api/events/${eventId}/register`, {}, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    toast.success("Successfully registered for event!");
     } catch (error) {
-      console.error("Error registering:", error);
-    }
-  };
+     console.error("Error registering:", error);
+     toast.error("Failed to register.");
+   }
+};
 
   return (
     <div>
       <h1>Home Page</h1>
       <p>Welcome to the Event Management Platform!</p>
+      {!localStorage.getItem("token") && (
+        <p style={{ color: "red", fontWeight: "bold" }}>You are viewing as a Guest. Login to register for events.</p>
+      )}
       <h2>Event Dashboard</h2>
 
       <div className="filters">
@@ -155,12 +163,12 @@ function Home({ role }) {
                   <p>{event.description}</p>
                   <p>📍 {event.location}</p>
                   {role !== "guest" && (
-
                     <div>
                     <button onClick={() => handleEditClick(event)}>Edit</button>
                     <button onClick={() => handleDelete(event._id)}>Delete</button>
                     </div>
                   )}
+                  <button onClick={() => registerForEvent(event._id)}>Register</button>
                 </div>
               )}
             </li>
