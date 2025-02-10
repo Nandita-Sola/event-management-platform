@@ -5,7 +5,8 @@ import { format } from "date-fns";
 import { parseISO } from "date-fns";
 import { io } from "socket.io-client";
 
-const socket = io("https://event-management-platform-backend-pfzw.onrender.com");
+const socket = io("https://event-management-platform-backend-pfzw.onrender.com", {
+  transports: ["websocket"], });
 
 function Home({ role }) {
   const [events, setEvents] = useState([]);
@@ -17,11 +18,15 @@ function Home({ role }) {
 
   useEffect(() => {
     fetchEvents();
-    socket.on("updateAttendees", (eventId) => {
-      console.log(`Event updated: ${eventId}`);
+    const handleUpdate = (eventId) => {
+      console.log(`Live update for event: ${eventId}`);
       fetchEvents();
-    });
-    return () => socket.off("updateAttendees");
+    };
+  
+    if (!socket.hasListeners("updateAttendees")) {
+      socket.on("updateAttendees", handleUpdate);
+    }
+    return () => socket.off("updateAttendees", handleUpdate);
   }, [category, startDate, events]);
 
   const fetchEvents = async () => {
@@ -31,12 +36,18 @@ function Home({ role }) {
       let url = "https://event-management-platform-backend-pfzw.onrender.com/api/events?";
       if (category) url += `category=${category}&`;
       if (startDate) url += `date=${startDate}&`;
-      const response = await axios.get(url, {
+      console.log("Fetching events from:", url); // Debugging
+      //const response = await axios.get(url, {
+      const { data } = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setEvents(response.data);
+      setEvents(data);
+      setLoading(false);
+      // setEvents(response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
+      toast.error("Failed to load events. Please try again.");
+      setLoading(false);
     }
     finally {
       setLoading(false);
