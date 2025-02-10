@@ -16,7 +16,8 @@ router.post("/register", async (req, res) => {
     if (existingUser) return res.status(400).json({ error: "Email already in use" });
 
     // Hash password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
     const validRole = role === "admin" ? "admin" : "user";
