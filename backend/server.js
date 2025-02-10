@@ -9,12 +9,20 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-      origin: "https://event-management-frontend-sepia.vercel.app/", //Allow frontend connection
+      origin: "https://event-management-frontend-sepia.vercel.app", //Allow frontend connection
       methods: ["GET", "POST"]
     }
   });
 
-app.use(cors());
+  app.use(
+    cors({
+      origin: "https://event-management-frontend-sepia.vercel.app",
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+      credentials: true
+    })
+  );
+  
 app.use(express.json());
 
 app.set("io", io); 
