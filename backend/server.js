@@ -17,6 +17,8 @@ const io = socketIo(server, {
 app.use(cors());
 app.use(express.json());
 
+app.set("io", io); 
+
 io.on("connection", (socket) => {
     console.log("A client connected");
     socket.on("newAttendee", (eventId) => {

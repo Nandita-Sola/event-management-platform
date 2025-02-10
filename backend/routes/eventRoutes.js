@@ -87,15 +87,16 @@ router.post("/events/:id/register", authenticateUser, async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
     if (!event) return res.status(404).json({ error: "Event not found" });
-
-    if (event.attendees.includes(req.user.userId)) {
-      return res.status(400).json({ error: "User already registered for this event." });
+    
+    if (!event.attendees) event.attendees = [];
+    if (!event.attendees.includes(req.user.userId)) { 
+      event.attendees.push(req.user.userId);
+      await event.save();
+      req.app.get("io").emit("updateAttendees", event._id);
+      io.emit("updateAttendees", event._id);
+      return res.status(200).json({ message: "Successfully registered for the event!" });
     }
-
-    event.attendees.push(req.user.userId);
-    await event.save();
-
-    req.app.get("io").emit("newAttendee", event._id);
+    res.status(400).json({ error: "User already registered for this event." });
 
     res.json({ message: "Attendee registered successfully!" });
   } catch (error) {

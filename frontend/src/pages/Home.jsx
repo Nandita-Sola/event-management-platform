@@ -3,39 +3,44 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
 import { parseISO } from "date-fns";
+import { io } from "socket.io-client";
+
+const socket = io("https://event-management-platform-backend-pfzw.onrender.com");
 
 function Home({ role }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState("");
   const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [editingEvent, setEditingEvent] = useState(null);
   const [updatedData, setUpdatedData] = useState({ name: "", description: "", date: "", location: "" });
 
   useEffect(() => {
     fetchEvents();
-  }, [category, startDate, endDate]);
+    socket.on("updateAttendees", (eventId) => {
+      console.log(`Event updated: ${eventId}`);
+      fetchEvents();
+    });
+    return () => socket.off("updateAttendees");
+  }, [category, startDate, events]);
 
-  const fetchEvents = () => {
-    const token = localStorage.getItem("token");
-    setLoading(true);
-    let url = "https://event-management-platform-backend-pfzw.onrender.com/api/events?";
-  
-    if (category) url += `category=${category}&`;
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      let url = "https://event-management-platform-backend-pfzw.onrender.com/api/events?";
+      if (category) url += `category=${category}&`;
       if (startDate) url += `date=${startDate}&`;
-  
-    axios.get(url, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((response) => {
-        setEvents(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching events:", error);
-        setLoading(false);
+      const response = await axios.get(url, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      setEvents(response.data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
+    finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id) => {
@@ -77,6 +82,18 @@ function Home({ role }) {
     } catch (error) {
       console.error("Error updating event:", error);
       toast.error("Failed to update event.");
+    }
+  };
+
+  const registerForEvent = async (eventId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(`https://event-management-platform-backend-pfzw.onrender.com/api/events/${eventId}/register`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log("Successfully registered for event");
+    } catch (error) {
+      console.error("Error registering:", error);
     }
   };
 
